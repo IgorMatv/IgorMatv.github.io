@@ -21,8 +21,8 @@ export const experience: ExperienceEntry[] = [
     role: 'Independent Development',
     period: '2025 — Present',
     bullets: [
-      'Building and releasing independent software, with a focus on backend architecture, real-time communication, deployment, and practical AI integration',
-      'Designed and developed Beat Game end to end while continuing hands-on development in backend engineering, data engineering, and applied AI',
+      'Building and releasing independent software, with a focus on backend architecture, real-time communication, data processing, and deployment',
+      'Designed and developed Beat Game end to end while continuing hands-on development in backend engineering, distributed systems, and data engineering.',
     ],
     tags: ['Java', 'Spring Boot', 'WebSocket', 'React', 'PostgreSQL', 'Redis', 'Docker'],
   },
