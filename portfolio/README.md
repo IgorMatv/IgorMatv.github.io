@@ -5,6 +5,8 @@ React, no CSS framework, no client-side JavaScript beyond the theme toggle and m
 
 Content and visual design are a faithful reproduction of the approved Claude Design reference in
 `../portfolio-design/`. See `portfolio-design/*.dc.html` for the original source of truth for copy and layout.
+That directory is kept locally only (git-ignored at the repo root) — it isn't part of the deployed site and
+doesn't need to ship in this public repo. All copy it produced already lives verbatim in `src/data/*.ts`.
 
 ## Structure
 
