@@ -1,0 +1,21 @@
+---
+import TechnologyTags from './TechnologyTags.astro';
+import type { TechGroup } from '../data/projects';
+
+interface Props {
+  groups: TechGroup[];
+}
+
+const { groups } = Astro.props;
+---
+
+<div class="tech-stack-groups">
+  {
+    groups.map((group) => (
+      <div>
+        <div class="tech-stack-group__title">{group.title}</div>
+        <TechnologyTags tags={group.items} variant="solid" label={`${group.title} technologies`} />
+      </div>
+    ))
+  }
+</div>

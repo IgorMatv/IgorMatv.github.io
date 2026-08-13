@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BackLink from '../components/BackLink.astro';
+import EarlierWorkCard from '../components/EarlierWorkCard.astro';
+import { earlierWork, earlierWorkIntro, additionalModulesNote } from '../data/earlier-work';
+
+const backHref = '/#earlier-work';
+---
+
+<BaseLayout
+  title="Earlier Work — Igor Matviichuk"
+  description={earlierWorkIntro.lede}
+  canonicalPath="/earlier-work/"
+>
+  <BackLink href={backHref} />
+
+  <div class="container container--page">
+    <section class="page-head">
+      <p class="eyebrow">{earlierWorkIntro.kicker}</p>
+      <h1 class="page-head__title">{earlierWorkIntro.title}</h1>
+      <p class="page-head__lede">{earlierWorkIntro.lede}</p>
+      <p class="text-faint-sm">{earlierWorkIntro.note}</p>
+    </section>
+
+    {earlierWork.map((entry) => <EarlierWorkCard entry={entry} />)}
+
+    <div class="note-block">
+      <p class="note-block__label">Additional Client Modules</p>
+      <p>{additionalModulesNote}</p>
+    </div>
+  </div>
+
+  <BackLink href={backHref} position="bottom" />
+</BaseLayout>

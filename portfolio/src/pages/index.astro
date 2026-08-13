@@ -1,0 +1,159 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionRow from '../components/SectionRow.astro';
+import TechnologyTags from '../components/TechnologyTags.astro';
+import { site } from '../data/site';
+import { about, experience, skillGroups } from '../data/home';
+import { beatGame, clientEngagements } from '../data/projects';
+import { earlierWorkSummary } from '../data/earlier-work';
+
+const description =
+  'I build Java and Spring Boot backend applications, event-driven workflows, and real-time products — from APIs and data processing to deployment.';
+---
+
+<BaseLayout
+  title="Igor Matviichuk — Backend Engineer"
+  description={description}
+  footerVariant="full"
+  canonicalPath="/"
+>
+  <section class="hero">
+    <h1 class="hero__title">
+      Backend engineer building <em>reliable systems</em> and practical products.
+    </h1>
+    <p class="hero__description">{description}</p>
+    <p class="hero__meta">Based in {site.location} &middot; Open to remote opportunities</p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="/#work">View projects</a>
+      {
+        site.resumeUrl && (
+          <a class="btn btn--outline" href={site.resumeUrl} download="Igor_Matviichuk_CV.pdf">
+            Download CV
+          </a>
+        )
+      }
+      <a class="btn btn--outline" href={site.githubUrl} target="_blank" rel="noopener noreferrer">
+        GitHub<span class="visually-hidden"> profile (opens in new tab)</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="work" class="container container--home">
+    <div class="split-row">
+      <div class="split-row__label">
+        <h2 class="split-row__eyebrow">Featured</h2>
+      </div>
+      <div class="split-row__content">
+        <div class="featured-card">
+          <p class="status-badge status-badge--md">{beatGame.homepage.kicker}</p>
+          <h3>{beatGame.name}</h3>
+          <p class="featured-card__lede">{beatGame.homepage.description}</p>
+          <p class="featured-card__detail">{beatGame.homepage.contribution}</p>
+          <p class="featured-card__stack">{beatGame.homepage.stack}</p>
+          <div class="featured-card__links">
+            <a class="link-accent" href={beatGame.liveUrl} target="_blank" rel="noopener noreferrer">
+              Live Product<span class="visually-hidden"> (opens in new tab)</span> →
+            </a>
+            <a href={`/projects/${beatGame.slug}/`}>View Project Details →</a>
+            <a href={beatGame.githubUrl} target="_blank" rel="noopener noreferrer">
+              GitHub<span class="visually-hidden"> repository (opens in new tab)</span> →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <SectionRow id="about" container="home" heading="About">
+    {about.map((paragraph) => <p>{paragraph}</p>)}
+  </SectionRow>
+
+  <SectionRow id="experience" container="home" heading="Experience">
+    <div class="timeline">
+      {
+        experience.map((job) => (
+          <div class="timeline__entry">
+            <div class="timeline__head">
+              <h3>
+                {job.role}
+                {job.company && <> &middot; {job.company}</>}
+              </h3>
+              <span class="timeline__period">{job.period}</span>
+            </div>
+            <ul class="timeline__bullets">
+              {job.bullets.map((bullet) => (
+                <li>{bullet}</li>
+              ))}
+            </ul>
+            <TechnologyTags tags={job.tags} variant="solid" label={`${job.role} technologies`} />
+          </div>
+        ))
+      }
+    </div>
+  </SectionRow>
+
+  <SectionRow id="skills" container="home" heading="Skills">
+    <div class="skill-groups">
+      {
+        skillGroups.map((group, index) => (
+          <div>
+            <div class="skill-group__head">
+              <span
+                class:list={['skill-group__dot', { 'skill-group__dot--alt': index % 2 === 1 }]}
+                aria-hidden="true"
+              />
+              <div class="skill-group__title">{group.title}</div>
+            </div>
+            <TechnologyTags tags={group.items} variant="chip" label={`${group.title} skills`} />
+          </div>
+        ))
+      }
+    </div>
+  </SectionRow>
+
+  <SectionRow id="projects" container="home" heading="Professional Projects">
+    <div class="clients">
+      {
+        clientEngagements.map((client) => (
+          <div class="client">
+            <div class="client__head">
+              <h3>{client.name}</h3>
+              <a href={`/projects/${client.slug}/`}>View {client.name} projects →</a>
+            </div>
+            <p class="client__summary">{client.homepage.summary}</p>
+            <div class="client__projects">
+              {client.homepage.projects.map((proj) => (
+                <p>
+                  <strong>{proj.title}</strong> — {proj.description}
+                </p>
+              ))}
+            </div>
+            <TechnologyTags
+              tags={client.homepage.tags}
+              variant="solid"
+              label={`${client.name} technologies`}
+            />
+          </div>
+        ))
+      }
+    </div>
+  </SectionRow>
+
+  <SectionRow id="earlier-work" container="home" heading="Selected Earlier Work">
+    <p class="text-faint-sm">
+      Selected systems and products from earlier in my career, spanning energy, financial operations,
+      education, enterprise search, and online learning.
+    </p>
+    <div>
+      {
+        earlierWorkSummary.map((item) => (
+          <div class="earlier-list__item">
+            <div class="earlier-list__title">{item.title}</div>
+            <p class="earlier-list__description">{item.description}</p>
+          </div>
+        ))
+      }
+    </div>
+    <a href="/earlier-work/">Explore earlier work →</a>
+  </SectionRow>
+</BaseLayout>

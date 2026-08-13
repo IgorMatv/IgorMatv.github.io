@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<template id="__bundler_thumbnail" data-bg-color="#fafafc">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#fafafc"/>
+    <text x="600" y="420" font-family="Georgia, serif" font-size="220" font-weight="700" fill="#3a3a44" text-anchor="middle">IM</text>
+  </svg>
+</template>
+<style>
+  body { margin: 0; font-family: 'Work Sans', sans-serif; transition: background 0.2s; overflow-x: hidden; }
+  a { color: {{ accent }}; text-decoration: none; }
+  a:hover { color: {{ accent2 }}; }
+  ::selection { background: {{ accentSoft }}; }
+  @media (max-width: 860px) {
+    [data-r="header"] { padding: 14px 20px !important; }
+    [data-r="navlinks"] { gap: 14px !important; font-size: 13px !important; }
+    [data-r="split"] { grid-template-columns: 1fr !important; gap: 14px !important; padding: 32px 20px !important; }
+    [data-r="wide"] { padding: 32px 20px !important; }
+    [data-r="pagehead"] { padding: 48px 20px 32px !important; }
+    [data-r="pagetitle"] { font-size: 34px !important; line-height: 1.15 !important; }
+    [data-r="grid2"] { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 520px) {
+    [data-r="navlinks"] { display: none !important; }
+    [data-r="pagetitle"] { font-size: 28px !important; }
+    [data-r="split"] { padding: 28px 16px !important; }
+    [data-r="wide"] { padding: 28px 16px !important; }
+    [data-r="pagehead"] { padding: 40px 16px 28px !important; }
+    [data-r="header"] { padding: 12px 16px !important; }
+  }
+</style>
+</helmet>
+
+<div style="background: {{ theme.bg }}; color: {{ theme.text }}; line-height: 1.5; transition: background 0.2s, color 0.2s;">
+
+  <header data-r="header" style="position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; background: {{ theme.headerBg }}; backdrop-filter: blur(10px); border-bottom: 1px solid {{ theme.border }}; flex-wrap: wrap; gap: 12px;">
+    <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.02em;">Igor Matviichuk</div>
+    <nav data-r="navlinks" style="display: flex; gap: 32px; flex-wrap: wrap;">
+      <a href="/#about" style="color: {{ theme.textMuted }}; font-size: 15px; font-weight: 500;">About</a>
+      <a href="/#experience" style="color: {{ theme.textMuted }}; font-size: 15px; font-weight: 500;">Experience</a>
+      <a href="/#skills" style="color: {{ theme.textMuted }}; font-size: 15px; font-weight: 500;">Skills</a>
+      <a href="/#projects" style="color: {{ theme.textMuted }}; font-size: 15px; font-weight: 500;">Projects</a>
+      <a href="/#contact" style="color: {{ theme.textMuted }}; font-size: 15px; font-weight: 500;">Contact</a>
+    </nav>
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 20px; background: {{ accentSoft }}; font-size: 13px; font-weight: 500; color: {{ accentDeep }};">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ accent }};"></span>
+        Open to opportunities
+      </div>
+      <button onClick="{{ toggleDark }}" aria-label="Toggle dark mode" style="background: none; border: 1px solid {{ theme.borderStrong }}; border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; color: {{ theme.textMuted }};">{{ darkToggleLabel }}</button>
+    </div>
+  </header>
+
+  <div data-r="wide" style="max-width: 780px; margin: 0 auto; padding: 32px 48px 0;">
+    <a href="/#projects" style="font-size: 14px; font-weight: 600; color: {{ theme.textFaint }};">← Back to Work</a>
+  </div>
+
+  <section data-r="pagehead" style="max-width: 780px; margin: 0 auto; padding: 24px 48px 48px; display: grid; gap: 16px;">
+    <div style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: {{ accentDeep }};">[ Independent Product · Status Label ]</div>
+    <h1 data-r="pagetitle" style="font-family: 'Space Grotesk', sans-serif; font-size: 46px; line-height: 1.1; letter-spacing: -0.02em; margin: 0; font-weight: 700;">[ Project Title ]</h1>
+    <p style="font-size: 18px; line-height: 1.6; color: {{ theme.textMuted2 }}; margin: 0; max-width: 620px;">[ One or two sentences describing what the product is, who it is for, and what it does. ]</p>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+      <sc-for list="{{ techTags }}" as="tag" hint-placeholder-count="6">
+        <span style="font-size: 13px; padding: 5px 12px; border-radius: 20px; border: 1px solid {{ theme.borderSoft }}; color: {{ theme.text2 }};">{{ tag }}</span>
+      </sc-for>
+    </div>
+    <div style="display: flex; gap: 18px; margin-top: 6px; flex-wrap: wrap; align-items: center;">
+      <a href="#" style="padding: 10px 20px; border-radius: 6px; background: {{ accentDeep }}; color: oklch(98% 0.01 195); font-weight: 600; font-size: 14px;">[ Live Product ]</a>
+      <a href="#" style="font-weight: 600; font-size: 14px; color: {{ theme.text3 }};">[ GitHub ] →</a>
+    </div>
+  </section>
+
+  <sc-if value="{{ mediaUrl }}" hint-placeholder-val="{{ false }}">
+    <section style="max-width: 780px; margin: 0 auto; padding: 0 48px 40px;">
+      <div style="border-radius: 12px; border: 1px solid {{ theme.border }}; overflow: hidden;">
+        <img src="{{ mediaUrl }}" alt="Product screenshot" style="width: 100%; display: block;" />
+      </div>
+    </section>
+  </sc-if>
+
+  <section data-r="split" style="max-width: 780px; margin: 0 auto; padding: 40px 48px; display: grid; grid-template-columns: 180px 1fr; gap: 40px; border-top: 1px solid {{ theme.border }};">
+    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: {{ theme.textFaint }}; margin: 0;">Overview</h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.7; color: {{ theme.text2 }}; max-width: 560px;">[ Placeholder: a concise explanation of the product, the problem it solves, and who uses it. Two to three sentences. ]</p>
+  </section>
+
+  <section data-r="split" style="max-width: 780px; margin: 0 auto; padding: 0 48px 40px; display: grid; grid-template-columns: 180px 1fr; gap: 40px;">
+    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: {{ theme.textFaint }}; margin: 0;">My Role</h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.7; color: {{ theme.text2 }}; max-width: 560px;">[ Placeholder: what was personally designed, implemented, and deployed — architecture, backend services, integrations, release. ]</p>
+  </section>
+
+  <section data-r="split" style="max-width: 780px; margin: 0 auto; padding: 0 48px 40px; display: grid; grid-template-columns: 180px 1fr; gap: 40px;">
+    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: {{ theme.textFaint }}; margin: 0;">Key Features</h2>
+    <div data-r="grid2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <sc-for list="{{ features }}" as="feature" hint-placeholder-count="4">
+        <div style="padding: 14px 16px; border-radius: 8px; border: 1px solid {{ theme.borderSoft }}; font-size: 15px; color: {{ theme.text2 }}; line-height: 1.5;">{{ feature }}</div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section data-r="split" style="max-width: 780px; margin: 0 auto; padding: 0 48px 40px; display: grid; grid-template-columns: 180px 1fr; gap: 40px;">
+    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: {{ theme.textFaint }}; margin: 0;">Technical Approach</h2>
+    <div style="display: grid; gap: 10px; max-width: 560px;">
+      <sc-for list="{{ technicalPoints }}" as="point" hint-placeholder-count="4">
+        <p style="margin: 0; padding-left: 14px; border-left: 2px solid {{ theme.border }}; font-size: 15px; color: {{ theme.text2 }}; line-height: 1.55;">{{ point }}</p>
+      </sc-for>
+    </div>
+  </section>
+
+  <section data-r="split" style="max-width: 780px; margin: 0 auto; padding: 0 48px 40px; display: grid; grid-template-columns: 180px 1fr; gap: 40px;">
+    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: {{ theme.textFaint }}; margin: 0;">Technology Stack</h2>
+    <div style="display: grid; gap: 16px;">
+      <sc-for list="{{ techGroups }}" as="group" hint-placeholder-count="3">
+        <div>
+          <div style="font-size: 14px; font-weight: 600; color: {{ theme.text3 }}; margin-bottom: 6px;">{{ group.title }}</div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <sc-for list="{{ group.items }}" as="item" hint-placeholder-count="4">
+              <span style="font-size: 13px; padding: 4px 10px; border-radius: 6px; background: {{ theme.tagBg }}; color: {{ theme.text3 }};">{{ item }}</span>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section data-r="split" style="max-width: 780px; margin: 0 auto; padding: 0 48px 56px; display: grid; grid-template-columns: 180px 1fr; gap: 40px;">
+    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: {{ theme.textFaint }}; margin: 0;">Current Status</h2>
+    <p style="margin: 0; font-size: 16px; line-height: 1.6; color: {{ theme.text2 }};">[ Placeholder: e.g. Live and actively developed / Experimental / In active development. ]</p>
+  </section>
+
+  <div data-r="wide" style="max-width: 780px; margin: 0 auto; padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid {{ theme.border }}; flex-wrap: wrap; gap: 12px;">
+    <a href="/#projects" style="font-size: 14px; font-weight: 600; color: {{ theme.textFaint }};">← Back to Work</a>
+    <sc-if value="{{ nextProject }}" hint-placeholder-val="{{ false }}">
+      <a href="{{ nextProject.link }}" style="font-size: 14px; font-weight: 600;">{{ nextProject.label }} →</a>
+    </sc-if>
+  </div>
+
+  <section id="contact" data-r="contact" style="background: {{ theme.contactBg }}; color: {{ theme.contactText }}; padding: 60px 48px 48px;">
+    <div style="max-width: 980px; margin: 0 auto; display: flex; justify-content: space-between; font-size: 13px; color: {{ theme.contactTextMuted }}; flex-wrap: wrap; gap: 8px;">
+      <span>© 2026 Igor Matviichuk</span>
+      <span>Malta · Remote</span>
+    </div>
+  </section>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;darkMode&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;hasMedia&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { dark: this.props.darkMode ?? false };
+
+  renderVals() {
+    const h1 = this.props.accentHue ?? 165;
+    const h2 = this.props.accent2Hue ?? 340;
+    const dark = this.state.dark;
+    const accent = dark ? `oklch(68% 0.13 ${h1})` : `oklch(58% 0.13 ${h1})`;
+    const accent2 = dark ? `oklch(70% 0.15 ${h2})` : `oklch(58% 0.15 ${h2})`;
+    const accentDeep = dark ? `oklch(78% 0.09 ${h1})` : `oklch(40% 0.10 ${h1})`;
+
+    const theme = dark ? {
+      bg: `oklch(17% 0.006 250)`, text: `oklch(94% 0.004 250)`, text2: `oklch(88% 0.006 250)`, text3: `oklch(85% 0.006 250)`,
+      textMuted: `oklch(75% 0.006 250)`, textMuted2: `oklch(80% 0.006 250)`, textFaint: `oklch(62% 0.008 250)`,
+      border: `oklch(28% 0.008 250)`, borderSoft: `oklch(30% 0.008 250)`, borderStrong: `oklch(36% 0.008 250)`,
+      headerBg: `oklch(17% 0.006 250 / 0.85)`, cardBg: `oklch(21% 0.007 250)`, tagBg: `oklch(27% 0.01 250)`,
+      contactBg: `oklch(10% 0.005 250)`, contactText: `oklch(96% 0.004 250)`, contactTextMuted: `oklch(65% 0.008 250)`,
+    } : {
+      bg: `oklch(98% 0.004 250)`, text: `oklch(20% 0.01 250)`, text2: `oklch(28% 0.01 250)`, text3: `oklch(30% 0.01 250)`,
+      textMuted: `oklch(35% 0.01 250)`, textMuted2: `oklch(32% 0.01 250)`, textFaint: `oklch(48% 0.01 250)`,
+      border: `oklch(90% 0.006 250)`, borderSoft: `oklch(88% 0.006 250)`, borderStrong: `oklch(85% 0.006 250)`,
+      headerBg: `oklch(98% 0.004 250 / 0.85)`, cardBg: `oklch(97% 0.006 250)`, tagBg: `oklch(93% 0.01 250)`,
+      contactBg: `oklch(20% 0.01 250)`, contactText: `oklch(96% 0.004 250)`, contactTextMuted: `oklch(75% 0.008 250)`,
+    };
+
+    return {
+      theme, accent, accent2, accentDeep,
+      accentSoft: dark ? `oklch(30% 0.05 ${h1})` : `oklch(92% 0.035 ${h1})`,
+      darkToggleLabel: dark ? '☀' : '☾',
+      toggleDark: () => this.setState(s => ({ dark: !s.dark })),
+
+      mediaUrl: (this.props.hasMedia ?? false) ? (this.props.mediaUrl ?? '') : '',
+
+      techTags: this.props.techTags ?? ["[ Tech 1 ]", "[ Tech 2 ]", "[ Tech 3 ]", "[ Tech 4 ]"],
+      features: this.props.features ?? ["[ Feature 1 ]", "[ Feature 2 ]", "[ Feature 3 ]", "[ Feature 4 ]"],
+      technicalPoints: this.props.technicalPoints ?? [
+        "[ Placeholder: real-time communication / game state approach. ]",
+        "[ Placeholder: data persistence approach. ]",
+        "[ Placeholder: external integrations. ]",
+        "[ Placeholder: deployment and monitoring. ]",
+      ],
+      techGroups: this.props.techGroups ?? [
+        { title: "[ Group 1 ]", items: ["[ Tech ]", "[ Tech ]", "[ Tech ]"] },
+        { title: "[ Group 2 ]", items: ["[ Tech ]", "[ Tech ]"] },
+        { title: "[ Group 3 ]", items: ["[ Tech ]", "[ Tech ]", "[ Tech ]"] },
+      ],
+      nextProject: this.props.nextProject ?? null,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

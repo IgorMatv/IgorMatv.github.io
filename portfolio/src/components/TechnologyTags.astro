@@ -1,0 +1,16 @@
+---
+// Neutral technology tag list. Deliberately theme-neutral in both light and
+// dark mode — accent colours are reserved for actions, statuses, and
+// section labels, never for individual technologies.
+interface Props {
+  tags: string[];
+  variant?: 'outline' | 'solid' | 'chip';
+  label?: string;
+}
+
+const { tags, variant = 'solid', label = 'Technologies' } = Astro.props;
+---
+
+<ul class:list={['tech-tags', `tech-tags--${variant}`]} aria-label={label}>
+  {tags.map((tag) => <li>{tag}</li>)}
+</ul>

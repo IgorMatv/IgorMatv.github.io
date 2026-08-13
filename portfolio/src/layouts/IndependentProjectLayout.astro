@@ -1,0 +1,67 @@
+---
+// Layout for independent-product case studies (currently: Beat Game).
+// Handles the shared chrome — back links, pagehead with live/GitHub
+// actions — while the page itself composes the body sections (Overview,
+// My Role, Key Features, ...) via SectionRow in the default slot.
+import BaseLayout from './BaseLayout.astro';
+import BackLink from '../components/BackLink.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import TechnologyTags from '../components/TechnologyTags.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  statusLabel: string;
+  name: string;
+  lede: string;
+  techTags: string[];
+  liveUrl?: string;
+  githubUrl?: string;
+  backHref?: string;
+}
+
+const {
+  title,
+  description,
+  statusLabel,
+  name,
+  lede,
+  techTags,
+  liveUrl,
+  githubUrl,
+  backHref = '/#work',
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <BackLink href={backHref} />
+
+  <div class="container container--page">
+    <section class="page-head">
+      <StatusBadge label={statusLabel} />
+      <h1 class="page-head__title">{name}</h1>
+      <p class="page-head__lede">{lede}</p>
+      <TechnologyTags tags={techTags} variant="outline" label={`${name} technologies`} />
+      <div class="page-head__actions">
+        {
+          liveUrl && (
+            <a class="btn btn--sm btn--deep" href={liveUrl} target="_blank" rel="noopener noreferrer">
+              Live Product<span class="visually-hidden"> (opens in new tab)</span>
+            </a>
+          )
+        }
+        {
+          githubUrl && (
+            <a class="link-arrow" href={githubUrl} target="_blank" rel="noopener noreferrer">
+              GitHub<span class="visually-hidden"> repository (opens in new tab)</span> →
+            </a>
+          )
+        }
+      </div>
+    </section>
+
+    <slot />
+  </div>
+
+  <BackLink href={backHref} position="bottom" />
+</BaseLayout>

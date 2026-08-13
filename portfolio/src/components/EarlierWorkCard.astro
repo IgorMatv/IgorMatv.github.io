@@ -1,0 +1,34 @@
+---
+import SectionRow from './SectionRow.astro';
+import TechnologyTags from './TechnologyTags.astro';
+import type { EarlierWorkEntry } from '../data/earlier-work';
+
+interface Props {
+  entry: EarlierWorkEntry;
+  divider?: boolean;
+}
+
+const { entry, divider = true } = Astro.props;
+---
+
+<SectionRow divider={divider}>
+  <Fragment slot="label">
+    <div class="earlier-entry__domain">{entry.domain}</div>
+    <h2 class="earlier-entry__title">{entry.title}</h2>
+  </Fragment>
+
+  <div class="field-group">
+    <div class="field-label">Overview</div>
+    {entry.overview.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">My Contribution</div>
+    <p>{entry.contribution}</p>
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">Technologies</div>
+    <TechnologyTags tags={entry.tags} variant="solid" label={`${entry.title} technologies`} />
+  </div>
+</SectionRow>

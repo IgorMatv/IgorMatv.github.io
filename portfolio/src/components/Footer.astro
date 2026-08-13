@@ -1,0 +1,70 @@
+---
+import { site, currentYear } from '../data/site';
+
+interface Props {
+  /** "full" renders the homepage contact CTA; "minimal" (default) renders
+   * just the copyright/location band used on every other page. */
+  variant?: 'full' | 'minimal';
+}
+
+const { variant = 'minimal' } = Astro.props;
+const isFull = variant === 'full';
+---
+
+<section id="contact" class:list={['contact-band', { 'contact-band--minimal': !isFull }]}>
+  <div class="contact-band__inner">
+    {
+      isFull && (
+        <>
+          <p class="contact-band__label">Let&rsquo;s Connect</p>
+          <h2 class="contact-band__title">Interested in working together?</h2>
+          <p class="contact-band__description">
+            I&rsquo;m open to backend engineering opportunities and conversations about Java, distributed
+            systems, and practical software development.
+          </p>
+          <div class="contact-band__actions">
+            {site.linkedinUrl && (
+              <a class="btn btn--accent" href={site.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                Connect on LinkedIn<span class="visually-hidden"> (opens in new tab)</span>
+              </a>
+            )}
+            <a
+              class="btn btn--contact-outline"
+              href={site.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              GitHub<span class="visually-hidden"> profile (opens in new tab)</span>
+            </a>
+            {site.resumeUrl && (
+              <a class="btn btn--contact-outline" href={site.resumeUrl} download="Igor_Matviichuk_CV.pdf">
+                Download CV
+              </a>
+            )}
+          </div>
+        </>
+      )
+    }
+    {
+      isFull ? (
+        <div class="contact-band__meta">
+          <span>
+            &copy; {currentYear} {site.name}
+          </span>
+          <span>
+            {site.location} &middot; {site.remoteNote}
+          </span>
+        </div>
+      ) : (
+        <>
+          <span>
+            &copy; {currentYear} {site.name}
+          </span>
+          <span>
+            {site.location} &middot; {site.remoteNote}
+          </span>
+        </>
+      )
+    }
+  </div>
+</section>

@@ -1,0 +1,39 @@
+---
+// Minimal vanilla-JS theme toggle. The initial theme is already applied
+// before first paint by the inline script in BaseLayout.astro; this button
+// only flips `data-theme` afterwards and persists the choice.
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark theme">
+  <span aria-hidden="true" data-theme-toggle-icon>☾</span>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const icon = document.querySelector<HTMLElement>('[data-theme-toggle-icon]');
+
+  function currentTheme(): 'light' | 'dark' {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  function syncButton(theme: 'light' | 'dark') {
+    if (!button || !icon) return;
+    button.setAttribute('aria-label', theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    icon.textContent = theme === 'dark' ? '☀' : '☾';
+  }
+
+  if (button) {
+    syncButton(currentTheme());
+
+    button.addEventListener('click', () => {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('theme', next);
+      } catch {
+        // localStorage unavailable (e.g. privacy mode) — theme still applies for this load.
+      }
+      syncButton(next);
+    });
+  }
+</script>

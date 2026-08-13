@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="IM">
+  <text x="16" y="23" font-family="Georgia, 'Times New Roman', serif" font-size="19" font-weight="700" fill="#3a3a44" text-anchor="middle">IM</text>
+  <style>
+    @media (prefers-color-scheme: dark) {
+      text { fill: #fafafc; }
+    }
+  </style>
+</svg>

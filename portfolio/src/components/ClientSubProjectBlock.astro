@@ -1,0 +1,40 @@
+---
+import SectionRow from './SectionRow.astro';
+import StatusBadge from './StatusBadge.astro';
+import TechnologyTags from './TechnologyTags.astro';
+import type { ClientSubProject } from '../data/projects';
+
+interface Props {
+  project: ClientSubProject;
+  divider?: boolean;
+}
+
+const { project, divider = true } = Astro.props;
+---
+
+<SectionRow divider={divider}>
+  <Fragment slot="label">
+    <h2>{project.title}</h2>
+    <StatusBadge label={project.status} size="sm" />
+  </Fragment>
+
+  <div class="field-group">
+    <div class="field-label">Overview</div>
+    {project.overview.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">My Contribution</div>
+    {project.contribution.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">Technical Details</div>
+    {project.technical.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+
+  <div class="field-group">
+    <div class="field-label">Technology Stack</div>
+    <TechnologyTags tags={project.tags} variant="solid" label={`${project.title} technology stack`} />
+  </div>
+</SectionRow>

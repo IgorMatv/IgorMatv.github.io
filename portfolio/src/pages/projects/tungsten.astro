@@ -1,0 +1,10 @@
+---
+import ClientProjectsLayout from '../../layouts/ClientProjectsLayout.astro';
+import { tungsten } from '../../data/projects';
+---
+
+<ClientProjectsLayout
+  title="Tungsten Network — Igor Matviichuk"
+  description={tungsten.intro[0]}
+  engagement={tungsten}
+/>

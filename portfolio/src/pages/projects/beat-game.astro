@@ -1,0 +1,44 @@
+---
+import IndependentProjectLayout from '../../layouts/IndependentProjectLayout.astro';
+import SectionRow from '../../components/SectionRow.astro';
+import KeyFeaturesGrid from '../../components/KeyFeaturesGrid.astro';
+import TechnicalPointsList from '../../components/TechnicalPointsList.astro';
+import TechStackGroups from '../../components/TechStackGroups.astro';
+import { beatGame } from '../../data/projects';
+---
+
+<IndependentProjectLayout
+  title="Beat Game — Igor Matviichuk"
+  description={beatGame.lede}
+  statusLabel={beatGame.statusLabel}
+  name={beatGame.name}
+  lede={beatGame.lede}
+  techTags={beatGame.techTags}
+  liveUrl={beatGame.liveUrl}
+  githubUrl={beatGame.githubUrl}
+  backHref="/#work"
+>
+  <SectionRow heading="Overview" divider>
+    {beatGame.overview.map((paragraph) => <p>{paragraph}</p>)}
+  </SectionRow>
+
+  <SectionRow heading="My Role" tight>
+    {beatGame.myRole.map((paragraph) => <p>{paragraph}</p>)}
+  </SectionRow>
+
+  <SectionRow heading="Key Features" tight>
+    <KeyFeaturesGrid features={beatGame.features} />
+  </SectionRow>
+
+  <SectionRow heading="Technical Approach" tight>
+    <TechnicalPointsList points={beatGame.technicalPoints} />
+  </SectionRow>
+
+  <SectionRow heading="Technology Stack" tight>
+    <TechStackGroups groups={beatGame.techGroups} />
+  </SectionRow>
+
+  <SectionRow heading="Current Status" tight last>
+    <p>{beatGame.currentStatus}</p>
+  </SectionRow>
+</IndependentProjectLayout>

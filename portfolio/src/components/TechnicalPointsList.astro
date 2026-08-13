@@ -1,0 +1,11 @@
+---
+interface Props {
+  points: string[];
+}
+
+const { points } = Astro.props;
+---
+
+<ul class="technical-points">
+  {points.map((point) => <li>{point}</li>)}
+</ul>

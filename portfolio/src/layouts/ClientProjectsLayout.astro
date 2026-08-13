@@ -1,0 +1,36 @@
+---
+// Layout for client-engagement case studies (LSEG, Tesco, Tungsten
+// Network). Each engagement page lists one or more sub-projects with the
+// same Overview / My Contribution / Technical Details / Technology Stack
+// shape, rendered here via ClientSubProjectBlock.
+import BaseLayout from './BaseLayout.astro';
+import BackLink from '../components/BackLink.astro';
+import ClientSubProjectBlock from '../components/ClientSubProjectBlock.astro';
+import type { ClientEngagement } from '../data/projects';
+
+interface Props {
+  title: string;
+  description: string;
+  engagement: ClientEngagement;
+  backHref?: string;
+}
+
+const { title, description, engagement, backHref = '/#projects' } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <BackLink href={backHref} label="← Back to Projects" />
+
+  <div class="container container--page">
+    <section class="page-head">
+      <p class="eyebrow">{engagement.kicker}</p>
+      <h1 class="page-head__title">{engagement.name}</h1>
+      <p class="page-head__note">{engagement.engagementNote}</p>
+      {engagement.intro.map((paragraph) => <p class="page-head__lede">{paragraph}</p>)}
+    </section>
+
+    {engagement.projects.map((project) => <ClientSubProjectBlock project={project} />)}
+  </div>
+
+  <BackLink href={backHref} label="← Back to Projects" position="bottom" />
+</BaseLayout>

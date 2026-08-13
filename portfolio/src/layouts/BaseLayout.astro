@@ -1,0 +1,81 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+import '../styles/global.css';
+
+// Self-hosted (not fetched from Google's CDN at page-load) — avoids sending
+// every visitor's IP to Google on each visit. Weights match what the design
+// actually uses: Space Grotesk 500/600/700, Work Sans 400/500/600 + 500 italic.
+import '@fontsource/space-grotesk/500.css';
+import '@fontsource/space-grotesk/600.css';
+import '@fontsource/space-grotesk/700.css';
+import '@fontsource/work-sans/400.css';
+import '@fontsource/work-sans/500.css';
+import '@fontsource/work-sans/600.css';
+import '@fontsource/work-sans/500-italic.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Defaults to the current URL path. Override for pages reachable at more
+   * than one path, if that's ever needed. */
+  canonicalPath?: string;
+  footerVariant?: 'full' | 'minimal';
+}
+
+const { title, description, canonicalPath, footerVariant = 'minimal' } = Astro.props;
+
+const canonicalUrl = new URL(canonicalPath ?? Astro.url.pathname, site.siteUrl).toString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!--
+      Apply the saved/preferred theme before first paint to avoid a flash of
+      the wrong theme. Kept tiny and inline (is:inline = not bundled/deferred)
+      so it runs synchronously ahead of CSS/JS. tokens.css's
+      `@media (prefers-color-scheme: dark)` fallback covers the no-JS case.
+    -->
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          /* ignore — CSS media-query fallback still applies */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <Header />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer variant={footerVariant} />
+  </body>
+</html>

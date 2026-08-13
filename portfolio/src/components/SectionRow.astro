@@ -1,0 +1,38 @@
+---
+// Reproduces the label-column + content-column "split" pattern used
+// throughout the design (About, Overview, My Contribution, etc.). Pass
+// `heading` for the common case of a plain uppercase label, or use the
+// `label` slot when the left column needs richer markup (e.g. a title plus
+// a status badge, as in the client-engagement sub-project blocks).
+//
+// On the homepage each split-row is also its own independently centred,
+// anchorable top-level section — pass `id` + `container` for that case.
+// On project detail pages several split-rows share one ancestor
+// `.container--page` wrapper instead, so those two props are omitted there.
+interface Props {
+  heading?: string;
+  divider?: boolean;
+  tight?: boolean;
+  last?: boolean;
+  id?: string;
+  container?: 'home' | 'page';
+}
+
+const { heading, divider = false, tight = false, last = false, id, container } = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={[
+    'split-row',
+    container && ['container', `container--${container}`],
+    { 'split-row--divider': divider, 'split-row--tight': tight && !last, 'split-row--tight-last': last },
+  ]}
+>
+  <div class="split-row__label">
+    {heading ? <h2 class="split-row__eyebrow">{heading}</h2> : <slot name="label" />}
+  </div>
+  <div class="split-row__content">
+    <slot />
+  </div>
+</section>

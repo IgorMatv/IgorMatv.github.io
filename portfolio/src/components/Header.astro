@@ -1,0 +1,34 @@
+---
+import { site } from '../data/site';
+import ThemeToggle from './ThemeToggle.astro';
+import MobileNavigation from './MobileNavigation.astro';
+
+const navLinks = [
+  { href: '/#about', label: 'About' },
+  { href: '/#experience', label: 'Experience' },
+  { href: '/#skills', label: 'Skills' },
+  { href: '/#projects', label: 'Projects' },
+  { href: '/#contact', label: 'Contact' },
+];
+---
+
+<header class="site-header">
+  <a class="site-header__brand" href="/">{site.name}</a>
+
+  <nav id="primary-nav" class="nav-links" aria-label="Primary">
+    {navLinks.map((link) => <a href={link.href}>{link.label}</a>)}
+  </nav>
+
+  <div class="header-actions">
+    {
+      site.available && (
+        <span class="availability-badge">
+          <span class="availability-badge__dot" aria-hidden="true" />
+          {site.availabilityLabel}
+        </span>
+      )
+    }
+    <ThemeToggle />
+    <MobileNavigation />
+  </div>
+</header>

@@ -1,0 +1,13 @@
+---
+interface Props {
+  href: string;
+  label?: string;
+  position?: 'top' | 'bottom';
+}
+
+const { href, label = '← Back to Work', position = 'top' } = Astro.props;
+---
+
+<div class:list={['back-link-row', { 'back-link-row--bottom': position === 'bottom' }]}>
+  <a class="back-link" href={href}>{label}</a>
+</div>

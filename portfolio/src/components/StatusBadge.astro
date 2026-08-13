@@ -1,0 +1,15 @@
+---
+// Consistent styling for status/kicker labels: "Production", "Proof of
+// Concept", "Independent Product · Live", domain labels, etc. Always the
+// same accent-deep treatment — status meaning is conveyed by the text,
+// not by colour.
+interface Props {
+  label: string;
+  size?: 'sm' | 'md';
+  as?: 'p' | 'span' | 'div';
+}
+
+const { label, size = 'md', as: Tag = 'p' } = Astro.props;
+---
+
+<Tag class:list={['status-badge', `status-badge--${size}`]}>{label}</Tag>
