@@ -19,7 +19,7 @@ export interface ExperienceEntry {
 export const experience: ExperienceEntry[] = [
   {
     role: 'Independent Development',
-    period: '2025 — Present',
+    period: '2026 — Present',
     bullets: [
       'Building and releasing independent software, with a focus on backend architecture, real-time communication, data processing, and deployment',
       'Designed and developed Beat Game end to end while continuing hands-on development in backend engineering, distributed systems, and data engineering.',
@@ -29,7 +29,7 @@ export const experience: ExperienceEntry[] = [
   {
     role: 'Backend Engineer',
     company: 'Luxoft',
-    period: '2018 — 2024',
+    period: '2019 — 2025',
     bullets: [
       'Developed enterprise backend applications for international clients across finance, retail, e-invoicing, HR, analytics, and workflow automation',
       'Worked with backend services, event-driven data processing, business workflows, reporting systems, and internal administration tools. Selected client projects are presented below',

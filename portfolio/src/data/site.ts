@@ -45,7 +45,7 @@ export const site: SiteConfig = {
   availabilityLabel: 'Open to opportunities',
   siteUrl: 'https://igormatv.github.io',
   githubUrl: 'https://github.com/IgorMatv',
-  linkedinUrl: 'https://www.linkedin.com/in/igor-matviichuk-543b613/',
+  linkedinUrl: 'https://www.linkedin.com/in/igor-matviichuk-java/',
   resumeUrl: resumeFileExists ? '/assets/Igor_Matviichuk_CV.pdf' : null,
 };
 
