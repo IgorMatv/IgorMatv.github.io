@@ -145,11 +145,37 @@ test('stopped: Start → progress → Running → Open', async () => {
   await context.close();
 });
 
-test('wake with next: lands back on the room', async () => {
+test('wake: nothing starts until the visitor clicks Start', async () => {
   const fake = new FakeLauncher('stopped');
   const { page, context } = await open(fake, '/?wake=beatgame&next=%2F%3Froom%3DXXXXXX&mock=real');
+  await modal(page).getByText('Beat Game is asleep').waitFor();
+  await sleep(3000);
+  assert.equal(fake.count('/start'), 0);
+  assert.equal(fake.count('/status'), 0);
+  await context.close();
+});
+
+test('wake with next: Start → lands back on the room', async () => {
+  const fake = new FakeLauncher('stopped');
+  const { page, context } = await open(fake, '/?wake=beatgame&next=%2F%3Froom%3DXXXXXX&mock=real');
+  await modal(page).getByRole('button', { name: 'Start Beat Game' }).click();
   await modal(page).getByText('Beat Game is starting').waitFor();
   await page.waitForURL(`${APP}/?room=XXXXXX`, { timeout: 25_000 });
+  assert.equal(fake.count('/start'), 1);
+  await context.close();
+});
+
+test('wake while already running: no auto-redirect, manual link with a hint', async () => {
+  const fake = new FakeLauncher('ready');
+  const { page, context } = await open(fake, '/?wake=beatgame&next=%2F%3Froom%3DXXXXXX&mock=real');
+  await modal(page).getByText('Beat Game is running').waitFor();
+  assert.equal(
+    await modal(page).getByRole('link', { name: 'Open Beat Game' }).getAttribute('href'),
+    `${APP}/?room=XXXXXX`,
+  );
+  await sleep(5000);
+  assert.ok(page.url().startsWith(BASE), 'stayed on the portfolio');
+  assert.equal(fake.count('/start'), 0);
   await context.close();
 });
 
@@ -157,7 +183,11 @@ for (const evil of ['%2F%2Fevil.com', 'https%3A%2F%2Fevil.com']) {
   test(`wake with next=${decodeURIComponent(evil)} goes to appUrl + /`, async () => {
     const fake = new FakeLauncher('ready');
     const { page, context } = await open(fake, `/?wake=beatgame&next=${evil}&mock=real`);
-    await page.waitForURL(`${APP}/`, { timeout: 15_000 });
+    await modal(page).getByText('Beat Game is running').waitFor();
+    assert.equal(
+      await modal(page).getByRole('link', { name: 'Open Beat Game' }).getAttribute('href'),
+      `${APP}/`,
+    );
     await context.close();
   });
 }
@@ -175,6 +205,7 @@ test('wake=unknown: normal page, no start request', async () => {
 test('reload after wake does not start again (URL cleaned)', async () => {
   const fake = new FakeLauncher('stopped', 60_000);
   const { page, context } = await open(fake, '/?wake=beatgame&mock=real');
+  await modal(page).getByRole('button', { name: 'Start Beat Game' }).click();
   await modal(page).getByText('Beat Game is starting').waitFor();
   assert.equal(new URL(page.url()).search, '?mock=real');
   await page.reload();
@@ -214,7 +245,7 @@ test('mobile: no horizontal scroll, wake modal fits', async () => {
   await context.route('https://static.cloudflareinsights.com/**', (r) => r.abort());
   const page = await context.newPage();
   await page.goto(`${BASE}/?wake=beatgame&mock=stopped`);
-  await modal(page).getByText('Beat Game is starting').waitFor();
+  await modal(page).getByText('Beat Game is asleep').waitFor();
   const { scrollWidth, innerWidth, dialogRight } = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
     innerWidth: window.innerWidth,
@@ -225,7 +256,7 @@ test('mobile: no horizontal scroll, wake modal fits', async () => {
   await context.close();
 });
 
-test('tab opened in the background: wake POSTs once, then no polling until shown', async () => {
+test('tab opened in the background: Start, then no polling until shown', async () => {
   const fake = new FakeLauncher('stopped', 6000);
   const context = await browser.newContext({ viewport: { width: 1200, height: 900 } });
   await context.route('https://static.cloudflareinsights.com/**', (r) => r.abort());
@@ -236,7 +267,7 @@ test('tab opened in the background: wake POSTs once, then no polling until shown
   await fake.install(context);
   const page = await context.newPage();
   await page.goto(`${BASE}/?wake=beatgame&next=%2F%3Froom%3DBG&mock=real`);
-  await modal(page).getByText('Beat Game is starting').waitFor();
+  await modal(page).getByRole('button', { name: 'Start Beat Game' }).click();
   await sleep(10_000);
   assert.equal(fake.count('/start'), 1);
   assert.equal(fake.count('/status'), 0, 'no polling while hidden');

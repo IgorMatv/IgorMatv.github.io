@@ -1,23 +1,13 @@
 // The ?wake=<id>&next=<path> entry: a visitor opened a sleeping demo and was
-// redirected here. Start it, show the wake modal, and send them back when it
-// is ready (docs/launcher-hub-spec.md §4.3, design §4.4).
+// redirected here. Offer to start it (only on an explicit click), then send
+// them back when it is ready (docs/launcher-hub-spec.md §4.3, design §4.4).
 import { demos } from '../../data/demos.ts';
 import type { LaunchView } from './controller.ts';
 import { initDemosPage, type DemosPage } from './page.ts';
 import { WakeModal } from './wake-modal.ts';
-import { buildTarget, cleanWakeParams, createAttemptCounter, decideRedirect, parseWake } from './wake.ts';
+import { buildTarget, cleanWakeParams, parseWake } from './wake.ts';
 
 type Wake = { id: string; next: string };
-
-function sessionStore(): Storage | null {
-  try {
-    return window.sessionStorage;
-  } catch {
-    return null;
-  }
-}
-
-const counter = createAttemptCounter(sessionStore(), () => Date.now());
 
 /** Entry point for /demos/: read and clear ?wake=, load the cards, then run the wake flow. */
 export async function bootDemosPage(): Promise<void> {
@@ -64,28 +54,39 @@ export function runWakeFlow(wake: Wake, page: DemosPage): void {
 
   const name = controller.view.name;
   const target = buildTarget(controller.view.appUrl, wake.next);
-  const wasReadyOnArrival = controller.view.phase === 'ready';
-  const attempt = counter.record(wake.id);
+
+  // Arriving here while the app already runs means the browser still reached the
+  // sleep redirect (a reused connection or cached DNS). Redirecting again would
+  // loop, so offer a link and explain instead.
+  if (controller.view.phase === 'ready') {
+    modal.set({
+      kicker: 'Ready',
+      title: `${name} is running`,
+      text:
+        'If your browser keeps bringing you back here, it is still holding on to an old connection. ' +
+        'Wait a minute and try again, or open the link in a private window.',
+      actions: [
+        { label: `Open ${name}`, variant: 'primary', href: target },
+        { label: 'Stay on this page', variant: 'outline', onClick: () => modal.close() },
+      ],
+    });
+    modal.open();
+    return;
+  }
 
   let cancelled = false;
   let redirectTimer: ReturnType<typeof setTimeout> | null = null;
+  let tick: ReturnType<typeof setInterval> | null = null;
+  let unsubscribe: () => void = () => {};
+
+  const stay = { label: 'Stay on this page', variant: 'outline' as const, onClick: () => modal.close() };
 
   const showProgress = () =>
     modal.set({
       kicker: 'Waking up',
       title: `${name} is starting`,
-      text: "The server sleeps when nobody is playing. This takes about a minute, then you'll be taken back automatically.",
-      actions: [{ label: 'Stay on this page', variant: 'outline', onClick: () => modal.close() }],
-    });
-
-  const showManual = () =>
-    modal.set({
-      kicker: 'Ready',
-      title: `Ready — open ${name}`,
-      text: `${name} is running. Open it to continue where you left off.`,
-      actions: [
-        { label: `Open ${name}`, variant: 'primary', href: target, onClick: () => counter.reset(wake.id) },
-      ],
+      text: "This takes about a minute, then you'll be taken back automatically.",
+      actions: [stay],
     });
 
   const showFailed = () =>
@@ -93,66 +94,59 @@ export function runWakeFlow(wake: Wake, page: DemosPage): void {
       kicker: 'Waking up',
       title: `Couldn't start ${name}`,
       text: 'Please try again in a moment.',
-      actions: [
-        {
-          label: 'Try again',
-          variant: 'deep',
-          onClick: () => {
-            showProgress();
-            controller.start();
-          },
-        },
-        { label: 'Stay on this page', variant: 'outline', onClick: () => modal.close() },
-      ],
+      actions: [{ label: 'Try again', variant: 'deep', onClick: () => start() }, stay],
     });
 
-  const onReady = () => {
-    const decision = decideRedirect({ attempt, wasReadyOnArrival, storageAvailable: counter.available });
-    if (decision.action === 'manual') {
-      showManual();
-      return;
-    }
-    modal.set({
-      kicker: 'Ready',
-      title: `${name} is ready`,
-      text: decision.delayMs > 0 ? 'Taking you back in a few seconds…' : 'Taking you back…',
-      actions: [{ label: 'Stay on this page', variant: 'outline', onClick: () => modal.close() }],
-    });
-    redirectTimer = setTimeout(() => {
-      if (!cancelled) location.replace(target);
-    }, decision.delayMs);
+  const stopTicking = () => {
+    if (tick !== null) clearInterval(tick);
+    tick = null;
   };
 
   const onView = (view: LaunchView) => {
     if (cancelled) return;
     if (view.phase === 'ready') {
       unsubscribe();
-      onReady();
+      stopTicking();
+      modal.set({ kicker: 'Ready', title: `${name} is ready`, text: 'Taking you back…', actions: [stay] });
+      redirectTimer = setTimeout(() => {
+        if (!cancelled) location.replace(target);
+      }, 0);
     } else if (view.phase === 'failed' || view.phase === 'unavailable') {
+      stopTicking();
       showFailed();
     } else {
       modal.progress(view);
     }
   };
 
-  // The card re-renders every second while running; mirror that in the modal.
-  const tick = setInterval(() => {
-    if (cancelled || !modal.isOpen) return clearInterval(tick);
-    const view = controller.view;
-    if (view.running) modal.progress(view);
-  }, 1000);
+  const start = () => {
+    showProgress();
+    unsubscribe();
+    unsubscribe = controller.subscribe(onView);
+    controller.start();
+    modal.progress(controller.view);
+    // The card re-renders every second while running; mirror that in the modal.
+    stopTicking();
+    tick = setInterval(() => {
+      const view = controller.view;
+      if (view.running) modal.progress(view);
+    }, 1000);
+  };
 
-  const unsubscribe = controller.subscribe(onView);
   modal.onClose(() => {
-    // "Stay on this page" or Esc: no auto-redirect; the card keeps going.
+    // "Stay on this page" or Esc: no auto-redirect; a started launch keeps going in the card.
     cancelled = true;
     unsubscribe();
-    clearInterval(tick);
+    stopTicking();
     if (redirectTimer !== null) clearTimeout(redirectTimer);
   });
 
-  showProgress();
-  modal.progress(controller.view);
+  // Nothing is started without an explicit click (bots and link previews must not wake EC2).
+  modal.set({
+    kicker: 'Asleep',
+    title: `${name} is asleep`,
+    text: "It sleeps when nobody is playing. Starting it takes about a minute, then you'll be taken back automatically.",
+    actions: [{ label: `Start ${name}`, variant: 'deep', onClick: () => start() }, stay],
+  });
   modal.open();
-  controller.start();
 }

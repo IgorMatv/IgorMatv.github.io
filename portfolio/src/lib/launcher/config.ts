@@ -16,12 +16,5 @@ export const MAX_RETRIES = 3;
 /** Give up if the project is not ready this long after Start. */
 export const TIMEOUT_MS = 180_000;
 
-/** Wait before redirecting when a repeat wake finds the project already ready (DNS cache). */
-export const WAKE_REPEAT_DELAY_MS = 15_000;
-/** After this many wake attempts, stop redirecting and show a manual link. */
-export const WAKE_MAX_ATTEMPTS = 3;
-/** The wake attempt counter resets after this long. */
-export const WAKE_COUNTER_TTL_MS = 600_000;
-
 export const DEFAULT_BOOT_SECONDS = 60;
 export const DEFAULT_IDLE_STOP_MINUTES = 30;
