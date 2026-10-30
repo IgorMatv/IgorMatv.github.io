@@ -342,3 +342,17 @@ test('API responses keep the display name from the initial project', async () =>
   assert.equal(controller.view.phase, 'ready');
   assert.equal(controller.view.name, 'Beat Game');
 });
+
+test('subscribe receives every view change until unsubscribed', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'booting' }), project({ state: 'ready' })];
+  const seen: string[] = [];
+  const unsubscribe = controller.subscribe((v) => seen.push(v.phase));
+  controller.start();
+  await clock.advance(4000);
+  unsubscribe();
+  await clock.advance(4000);
+  assert.deepEqual(seen, ['starting', 'starting', 'booting']);
+  assert.equal(controller.view.phase, 'ready');
+});

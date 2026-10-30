@@ -18,7 +18,8 @@ function progressLine(view: LaunchView): string {
   return `${elapsed} s of ~${view.expectedBootSeconds} s`;
 }
 
-function copyFor(view: LaunchView): Copy {
+/** State title and subtitle for a view (shared by the card strip and the wake modal). */
+export function describe(view: LaunchView): Copy {
   const following = 'Press Start to follow its progress';
   const titles: Record<Phase, Copy> = {
     stopped: { dot: 'idle', title: 'Asleep', sub: `Starts in ~${minutes(view.expectedBootSeconds)} min` },
@@ -162,7 +163,7 @@ function skeleton(el: HTMLElement): Parts {
 
 export function renderControl(el: HTMLElement, view: LaunchView, onStart: () => void): void {
   const p = parts.get(el) ?? skeleton(el);
-  const copy = copyFor(view);
+  const copy = describe(view);
 
   p.dot.className = `demo-dot demo-dot--${copy.dot}`;
   if (p.title.textContent !== copy.title) p.title.textContent = copy.title;

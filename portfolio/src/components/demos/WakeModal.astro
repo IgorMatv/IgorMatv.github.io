@@ -1,0 +1,25 @@
+---
+// Shown when a visitor arrives from a sleeping demo (?wake=<id>). Content is
+// filled in by src/lib/launcher/wake-modal.ts.
+---
+
+<dialog class="wake-modal" data-wake-modal aria-labelledby="wake-modal-title">
+  <div class="wake-modal__body">
+    <p class="eyebrow" data-wake-kicker>Waking up</p>
+    <h2 id="wake-modal-title" class="wake-modal__title" data-wake-title></h2>
+    <p class="wake-modal__text" data-wake-text></p>
+    <div
+      class="progress-bar"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-label="Start-up progress"
+      data-wake-bar
+      hidden
+    >
+      <span class="progress-bar__fill"></span>
+    </div>
+    <p class="wake-modal__status" data-wake-status></p>
+    <div class="wake-modal__actions" data-wake-actions></div>
+  </div>
+</dialog>

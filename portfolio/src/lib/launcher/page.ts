@@ -87,8 +87,8 @@ export async function initDemosPage(): Promise<DemosPage> {
       const el = controlFor(demo.id);
       if (el && demo.appUrl) renderControl(el, unknownView(demo.name, demo.appUrl), () => {});
     }
-    page = { controllers, apiDown: true };
-    return page;
+    // Not cached: a retry should ask the API again.
+    return { controllers, apiDown: true };
   }
 
   const deps = {

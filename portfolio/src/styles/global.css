@@ -359,6 +359,17 @@ a:hover {
   color: var(--color-text-muted);
 }
 
+/* Six nav items: tighten spacing before the mobile menu takes over. */
+@media (max-width: 1100px) {
+  .site-header {
+    padding-inline: 2rem;
+  }
+
+  .nav-links {
+    gap: 1.25rem;
+  }
+}
+
 @media (max-width: 860px) {
   .site-header {
     padding: 0.875rem 1.25rem;
@@ -1235,6 +1246,58 @@ a:hover {
   border-radius: 3px;
   background: var(--color-accent);
   transition: width 0.8s linear;
+}
+
+/* Wake-up modal (?wake=) */
+.wake-modal {
+  margin: auto;
+  width: min(420px, calc(100% - 2rem));
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: 0 12px 40px oklch(0% 0 0 / 0.25);
+}
+
+.wake-modal::backdrop {
+  background: oklch(20% 0.01 250 / 0.5);
+}
+
+.wake-modal__body {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.75rem;
+}
+
+.wake-modal__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.wake-modal__text {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-text-2);
+}
+
+.wake-modal__status {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.wake-modal__status:empty {
+  display: none;
+}
+
+.wake-modal__actions {
+  display: flex;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
 }
 
 @media (max-width: 860px) {

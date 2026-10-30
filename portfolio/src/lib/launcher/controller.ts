@@ -63,6 +63,7 @@ export class LaunchController {
   private pending: (() => void) | null = null;
   private readonly deps: ControllerDeps;
   private readonly onChange: (view: LaunchView) => void;
+  private readonly listeners = new Set<(view: LaunchView) => void>();
 
   constructor(initial: Project, deps: ControllerDeps, onChange: (view: LaunchView) => void) {
     this.project = initial;
@@ -121,6 +122,14 @@ export class LaunchController {
     }
     this.emit();
     void this.post();
+  }
+
+  /** Extra observer (e.g. the wake modal). Returns an unsubscribe function. */
+  subscribe(listener: (view: LaunchView) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
 
   /** Pause requests while the tab is hidden; resume immediately when shown. */
@@ -264,6 +273,9 @@ export class LaunchController {
   }
 
   private emit(): void {
-    if (!this.disposed) this.onChange(this.view);
+    if (this.disposed) return;
+    const view = this.view;
+    this.onChange(view);
+    for (const listener of this.listeners) listener(view);
   }
 }

@@ -17,6 +17,16 @@ const description =
   footerVariant="full"
   canonicalPath="/"
 >
+  <!--
+    Sleeping demos redirect visitors here as /?wake=<id>&next=<path>
+    (launcher backend). The launcher lives on /demos/, so forward there
+    before anything renders.
+  -->
+  <script is:inline slot="head">
+    if (new URLSearchParams(location.search).has('wake')) {
+      location.replace('/demos/' + location.search + location.hash);
+    }
+  </script>
   <section class="hero">
     <h1 class="hero__title">
       Backend engineer building <em>reliable systems</em> and practical products.

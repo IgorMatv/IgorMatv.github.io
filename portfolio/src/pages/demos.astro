@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HowItWorks from '../components/demos/HowItWorks.astro';
 import DemoCard from '../components/demos/DemoCard.astro';
+import WakeModal from '../components/demos/WakeModal.astro';
 import { demos, demosIntro } from '../data/demos';
 ---
 
@@ -19,10 +20,12 @@ import { demos, demosIntro } from '../data/demos';
       {demos.map((demo) => <DemoCard demo={demo} />)}
     </div>
   </div>
+
+  <WakeModal />
 </BaseLayout>
 
 <script>
-  import { initDemosPage } from '../lib/launcher/page.ts';
+  import { bootDemosPage } from '../lib/launcher/wake-flow.ts';
 
-  void initDemosPage();
+  void bootDemosPage();
 </script>
