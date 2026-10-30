@@ -113,6 +113,8 @@ export async function initDemosPage(): Promise<DemosPage> {
       render(view);
       if (view.running) track(controller, () => render(controller.view));
     });
+    // visibilitychange only fires on a change; a tab opened in the background starts hidden.
+    controller.setHidden(document.hidden);
     render(controller.view);
     controllers.set(project.id, controller);
   }

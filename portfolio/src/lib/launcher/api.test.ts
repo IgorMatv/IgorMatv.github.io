@@ -139,3 +139,29 @@ test('baseUrl trailing slash is tolerated', async () => {
   await createHttpApi(`${BASE}/`, fn).listProjects();
   assert.equal(calls[0].url, `${BASE}/projects`);
 });
+
+test('a hung request is aborted → ApiError network', async () => {
+  const fn = ((_input: string | URL | Request, init?: RequestInit) =>
+    new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(new DOMException('aborted', 'TimeoutError')));
+    })) as typeof fetch;
+  await rejectsWithKind(createHttpApi(BASE, fn, 20).getStatus('beatgame'), 'network');
+});
+
+test('appUrl must be https', async () => {
+  const { fn } = fakeFetch(() =>
+    json(200, {
+      projects: [
+        { ...beatgameStopped, id: 'a', appUrl: 'javascript:alert(1)' },
+        { ...beatgameStopped, id: 'b', appUrl: 'http://beatgame.app' },
+        { ...beatgameStopped, id: 'c', appUrl: 'not a url' },
+        beatgameStopped,
+      ],
+    }),
+  );
+  const projects = await createHttpApi(BASE, fn).listProjects();
+  assert.deepEqual(
+    projects.map((p) => p.id),
+    ['beatgame'],
+  );
+});

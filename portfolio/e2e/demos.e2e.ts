@@ -224,3 +224,26 @@ test('mobile: no horizontal scroll, wake modal fits', async () => {
   assert.ok(dialogRight <= innerWidth, `dialog overflows: ${dialogRight}`);
   await context.close();
 });
+
+test('tab opened in the background: wake POSTs once, then no polling until shown', async () => {
+  const fake = new FakeLauncher('stopped', 6000);
+  const context = await browser.newContext({ viewport: { width: 1200, height: 900 } });
+  await context.route('https://static.cloudflareinsights.com/**', (r) => r.abort());
+  await context.route(`${APP}/**`, (r) => r.fulfill({ contentType: 'text/html', body: '<h1>BeatGame</h1>' }));
+  await context.addInitScript(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+  });
+  await fake.install(context);
+  const page = await context.newPage();
+  await page.goto(`${BASE}/?wake=beatgame&next=%2F%3Froom%3DBG&mock=real`);
+  await modal(page).getByText('Beat Game is starting').waitFor();
+  await sleep(10_000);
+  assert.equal(fake.count('/start'), 1);
+  assert.equal(fake.count('/status'), 0, 'no polling while hidden');
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.waitForURL(`${APP}/?room=BG`, { timeout: 15_000 });
+  await context.close();
+});

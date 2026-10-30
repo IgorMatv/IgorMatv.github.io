@@ -3,6 +3,8 @@
 export const API_BASE: string =
   import.meta.env?.PUBLIC_LAUNCHER_API ?? 'https://iy9imezsie.execute-api.us-east-1.amazonaws.com';
 
+/** A request that has not answered by then counts as a network error. */
+export const REQUEST_TIMEOUT_MS = 15_000;
 /** Status polling interval after Start / during a wake. */
 export const POLL_MS = 4000;
 /** Delay before the next request after a 429. */

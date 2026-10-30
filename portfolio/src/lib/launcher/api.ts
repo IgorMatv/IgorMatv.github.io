@@ -1,4 +1,4 @@
-import { DEFAULT_BOOT_SECONDS, DEFAULT_IDLE_STOP_MINUTES } from './config.ts';
+import { DEFAULT_BOOT_SECONDS, DEFAULT_IDLE_STOP_MINUTES, REQUEST_TIMEOUT_MS } from './config.ts';
 import { ApiError, type LauncherApi, type Project, type ProjectState } from './types.ts';
 
 const KNOWN_STATES: readonly ProjectState[] = [
@@ -22,6 +22,12 @@ export function normalizeProject(raw: unknown): Project | null {
   const r = raw as Record<string, unknown>;
   if (typeof r.id !== 'string' || !r.id) return null;
   if (typeof r.appUrl !== 'string' || !r.appUrl) return null;
+  // appUrl ends up in href and location.replace: only https is acceptable.
+  try {
+    if (new URL(r.appUrl).protocol !== 'https:') return null;
+  } catch {
+    return null;
+  }
 
   const state = KNOWN_STATES.includes(r.state as ProjectState) ? (r.state as ProjectState) : 'unavailable';
 
@@ -39,15 +45,21 @@ export function normalizeProject(raw: unknown): Project | null {
 export function createHttpApi(
   baseUrl: string,
   fetchFn: typeof fetch = (...args) => fetch(...args),
+  requestTimeoutMs: number = REQUEST_TIMEOUT_MS,
 ): LauncherApi {
   const base = baseUrl.replace(/\/+$/, '');
 
   async function request(path: string, method: 'GET' | 'POST' = 'GET'): Promise<unknown> {
     let response: Response;
+    // A stalled connection must not freeze the launch: abort and treat it as a network error.
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), requestTimeoutMs);
     try {
-      response = await fetchFn(`${base}${path}`, { method, cache: 'no-store' });
+      response = await fetchFn(`${base}${path}`, { method, cache: 'no-store', signal: abort.signal });
     } catch (err) {
       throw new ApiError('network', err instanceof Error ? err.message : undefined);
+    } finally {
+      clearTimeout(timer);
     }
     if (response.status === 429) throw new ApiError('rate-limited');
     if (response.status === 404) throw new ApiError('not-found');
