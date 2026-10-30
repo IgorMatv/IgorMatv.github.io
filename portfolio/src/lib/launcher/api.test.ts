@@ -8,7 +8,7 @@ const BASE = 'https://api.example';
 const beatgameStopped = {
   id: 'beatgame',
   name: 'BeatGame',
-  appUrl: 'https://beatgame.app',
+  appUrl: 'https://play.beatgame.app',
   state: 'stopped',
   startedAt: null,
   expectedBootSeconds: 60,
@@ -79,10 +79,10 @@ test('entries without id or appUrl are dropped', async () => {
 
 test('appUrl trailing slash is stripped', async () => {
   const { fn } = fakeFetch(() =>
-    json(200, { projects: [{ ...beatgameStopped, appUrl: 'https://beatgame.app/' }] }),
+    json(200, { projects: [{ ...beatgameStopped, appUrl: 'https://play.beatgame.app/' }] }),
   );
   const [project] = await createHttpApi(BASE, fn).listProjects();
-  assert.equal(project.appUrl, 'https://beatgame.app');
+  assert.equal(project.appUrl, 'https://play.beatgame.app');
 });
 
 test('429 → ApiError rate-limited', async () => {
@@ -153,7 +153,7 @@ test('appUrl must be https', async () => {
     json(200, {
       projects: [
         { ...beatgameStopped, id: 'a', appUrl: 'javascript:alert(1)' },
-        { ...beatgameStopped, id: 'b', appUrl: 'http://beatgame.app' },
+        { ...beatgameStopped, id: 'b', appUrl: 'http://play.beatgame.app' },
         { ...beatgameStopped, id: 'c', appUrl: 'not a url' },
         beatgameStopped,
       ],

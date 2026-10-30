@@ -69,7 +69,7 @@ export function createMockApi(o: {
     return normalizeProject({
       id: 'beatgame',
       name: 'BeatGame',
-      appUrl: 'https://beatgame.app',
+      appUrl: 'https://play.beatgame.app',
       state,
       startedAt: includeStartedAt && running && startedAt !== null ? new Date(startedAt).toISOString() : null,
       expectedBootSeconds: bootMs / 1000,

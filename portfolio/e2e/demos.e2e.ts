@@ -1,5 +1,5 @@
 // Browser checks for /demos/ (docs/launcher-hub-spec.md §8 acceptance list).
-// Runs against `astro dev`; the launcher API and beatgame.app are faked with
+// Runs against `astro dev`; the launcher API and the game host are faked with
 // Playwright routes, so nothing leaves the machine.
 //
 //   npm run test:e2e
@@ -11,7 +11,7 @@ import { chromium, type Browser, type BrowserContext, type Page } from 'playwrig
 const PORT = 4331;
 const BASE = `http://localhost:${PORT}`;
 const API = 'https://iy9imezsie.execute-api.us-east-1.amazonaws.com';
-const APP = 'https://beatgame.app';
+const APP = 'https://play.beatgame.app';
 
 let browser: Browser;
 
@@ -276,5 +276,17 @@ test('tab opened in the background: Start, then no polling until shown', async (
     document.dispatchEvent(new Event('visibilitychange'));
   });
   await page.waitForURL(`${APP}/?room=BG`, { timeout: 15_000 });
+  await context.close();
+});
+
+test('API down: wake fallback link uses the canonical https://beatgame.app', async () => {
+  const { page, context } = await open(null, '/?wake=beatgame&next=%2F%3Froom%3DX&mock=down');
+  await modal(page).getByText("Can't reach the launcher right now").waitFor();
+  assert.equal(
+    await modal(page)
+      .getByRole('link', { name: /Try opening Beat Game/ })
+      .getAttribute('href'),
+    'https://beatgame.app/?room=X',
+  );
   await context.close();
 });

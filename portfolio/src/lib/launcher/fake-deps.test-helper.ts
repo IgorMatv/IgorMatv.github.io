@@ -9,7 +9,7 @@ export function project(overrides: Partial<Project> = {}): Project {
   return {
     id: 'beatgame',
     name: 'BeatGame',
-    appUrl: 'https://beatgame.app',
+    appUrl: 'https://play.beatgame.app',
     state: 'stopped',
     startedAt: null,
     expectedBootSeconds: 60,

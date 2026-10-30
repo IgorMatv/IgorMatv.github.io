@@ -33,8 +33,8 @@ test('parseWake without wake → null', () => {
 });
 
 test('buildTarget joins without double slash', () => {
-  assert.equal(buildTarget('https://beatgame.app', '/x'), 'https://beatgame.app/x');
-  assert.equal(buildTarget('https://beatgame.app/', '/?room=A'), 'https://beatgame.app/?room=A');
+  assert.equal(buildTarget('https://play.beatgame.app', '/x'), 'https://play.beatgame.app/x');
+  assert.equal(buildTarget('https://play.beatgame.app/', '/?room=A'), 'https://play.beatgame.app/?room=A');
 });
 
 test('cleanWakeParams drops wake and next, keeps the rest', () => {
@@ -43,4 +43,12 @@ test('cleanWakeParams drops wake and next, keeps the rest', () => {
     '/demos/?mock=stopped#top',
   );
   assert.equal(cleanWakeParams('https://igormatv.github.io/demos/?wake=beatgame'), '/demos/');
+});
+
+test('buildTarget works with any appUrl host', () => {
+  assert.equal(buildTarget('https://other.example:8443', '/?room=A'), 'https://other.example:8443/?room=A');
+  assert.equal(
+    buildTarget('https://play.beatgame.app', sanitizeNext('//evil.com')),
+    'https://play.beatgame.app/',
+  );
 });

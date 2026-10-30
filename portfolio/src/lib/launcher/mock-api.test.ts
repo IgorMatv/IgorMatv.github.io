@@ -29,7 +29,7 @@ test('stopped: start → starting → booting → ready over bootSeconds', async
   const { api, advance } = setup('stopped');
   const [initial] = await api.listProjects();
   assert.equal(initial.state, 'stopped');
-  assert.equal(initial.appUrl, 'https://beatgame.app');
+  assert.equal(initial.appUrl, 'https://play.beatgame.app');
   const started = await api.start('beatgame');
   assert.equal(started.state, 'starting');
   assert.equal(started.startedAt, null);
