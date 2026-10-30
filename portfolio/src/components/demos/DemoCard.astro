@@ -1,0 +1,30 @@
+---
+// One demo project. The control strip starts hidden and is filled in by the
+// launcher script once the API confirms the project can be launched.
+import type { DemoEntry } from '../../data/demos';
+
+interface Props {
+  demo: DemoEntry;
+}
+
+const { demo } = Astro.props;
+---
+
+<article class="featured-card demo-card" data-demo-id={demo.id}>
+  <h3>{demo.name}</h3>
+  <p class="featured-card__lede">{demo.description}</p>
+  <p class="featured-card__stack">{demo.stack}</p>
+  <div class="demo-control" data-demo-control hidden aria-live="polite"></div>
+  {
+    (demo.detailsHref || demo.githubUrl) && (
+      <div class="featured-card__links">
+        {demo.detailsHref && <a href={demo.detailsHref}>Project details →</a>}
+        {demo.githubUrl && (
+          <a href={demo.githubUrl} target="_blank" rel="noopener noreferrer">
+            GitHub<span class="visually-hidden"> repository (opens in new tab)</span> ↗
+          </a>
+        )}
+      </div>
+    )
+  }
+</article>

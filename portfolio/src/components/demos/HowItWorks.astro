@@ -1,0 +1,21 @@
+---
+// Four-step explanation of the scale-to-zero mechanism behind the demos.
+import { howItWorks } from '../../data/demos';
+---
+
+<section class="how-it-works" aria-labelledby="how-it-works-heading">
+  <h2 id="how-it-works-heading" class="visually-hidden">How it works</h2>
+  <ol class="how-it-works__steps">
+    {
+      howItWorks.map((step, index) => (
+        <li class="how-it-works__step">
+          <span class="how-it-works__number" aria-hidden="true">
+            {index + 1}
+          </span>
+          <p class="how-it-works__title">{step.title}</p>
+          <p class="how-it-works__text">{step.text}</p>
+        </li>
+      ))
+    }
+  </ol>
+</section>

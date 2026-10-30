@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HowItWorks from '../components/demos/HowItWorks.astro';
+import DemoCard from '../components/demos/DemoCard.astro';
+import { demos, demosIntro } from '../data/demos';
+---
+
+<BaseLayout title="Live Demos — Igor Matviichuk" description={demosIntro.lede} canonicalPath="/demos/">
+  <div class="container container--page">
+    <section class="page-head">
+      <p class="eyebrow">{demosIntro.kicker}</p>
+      <h1 class="page-head__title">{demosIntro.title}</h1>
+      <p class="page-head__lede">{demosIntro.lede}</p>
+    </section>
+
+    <HowItWorks />
+
+    <div class="demo-list" data-demo-list>
+      {demos.map((demo) => <DemoCard demo={demo} />)}
+    </div>
+  </div>
+</BaseLayout>
