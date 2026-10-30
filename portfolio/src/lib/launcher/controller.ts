@@ -1,9 +1,9 @@
 // Drives one project's launch: POST /start, poll /status until ready, and
 // apply the timing rules from docs/launcher-hub-spec.md §4. DOM-free — the
 // clock, timers and API are injected so the rules can be unit-tested.
-import { POLL_MS, TIMEOUT_MS } from './config.ts';
+import { MAX_RETRIES, POLL_MS, RATE_LIMIT_MS, RETRY_MS, TIMEOUT_MS } from './config.ts';
 import { elapsedSeconds, progressPercent } from './progress.ts';
-import { type LauncherApi, type Project, type ProjectState } from './types.ts';
+import { ApiError, type LauncherApi, type Project, type ProjectState } from './types.ts';
 
 export type Phase =
   'stopped' | 'starting' | 'booting' | 'ready' | 'stopping' | 'failed' | 'unavailable' | 'unknown';
@@ -51,6 +51,16 @@ export class LaunchController {
   private runStartedAt = 0;
   private timer: unknown = null;
   private disposed = false;
+  /** Consecutive network/5xx failures in the current launch. */
+  private failures = 0;
+  /** ТЗ §4.4: after a stopping → stopped transition, POST /start once more. */
+  private sawStopping = false;
+  private reposted = false;
+  private hidden = false;
+  /** The request behind the active timer. */
+  private scheduled: (() => void) | null = null;
+  /** The next request, held back while the tab is hidden. */
+  private pending: (() => void) | null = null;
   private readonly deps: ControllerDeps;
   private readonly onChange: (view: LaunchView) => void;
 
@@ -63,7 +73,10 @@ export class LaunchController {
   get view(): LaunchView {
     const now = this.deps.now();
     const p = this.project;
-    const phase: Phase = this.failed ? 'failed' : p.state;
+    let phase: Phase = p.state;
+    if (this.failed) phase = 'failed';
+    // Mid-launch, a bare 'stopped' (before the re-POST lands) still means "on its way up".
+    else if (this.running && p.state === 'stopped') phase = 'starting';
     const showsProgress = this.running || p.state === 'ready';
     return {
       phase,
@@ -72,7 +85,7 @@ export class LaunchController {
       appUrl: p.appUrl,
       progress: showsProgress
         ? progressPercent({
-            state: p.state,
+            state: phase === 'starting' ? 'starting' : p.state,
             startedAt: p.startedAt,
             clickedAt: this.clickedAt,
             expectedBootSeconds: p.expectedBootSeconds,
@@ -96,6 +109,10 @@ export class LaunchController {
     if (this.running || this.disposed) return;
     this.running = true;
     this.failed = false;
+    this.failures = 0;
+    this.sawStopping = false;
+    this.reposted = false;
+    this.pending = null;
     this.clickedAt = this.deps.now();
     this.runStartedAt = this.clickedAt;
     // Optimistic: the button press is acknowledged before the POST returns.
@@ -106,9 +123,26 @@ export class LaunchController {
     void this.post();
   }
 
+  /** Pause requests while the tab is hidden; resume immediately when shown. */
+  setHidden(hidden: boolean): void {
+    if (this.disposed || hidden === this.hidden) return;
+    this.hidden = hidden;
+    if (hidden) {
+      if (this.timer !== null && this.scheduled) {
+        this.pending = this.scheduled;
+        this.clearTimer();
+      }
+      return;
+    }
+    const action = this.pending;
+    this.pending = null;
+    if (action && this.running) action();
+  }
+
   dispose(): void {
     this.disposed = true;
     this.running = false;
+    this.pending = null;
     this.clearTimer();
   }
 
@@ -116,10 +150,11 @@ export class LaunchController {
     try {
       const result = await this.deps.api.start(this.project.id);
       if (!this.live()) return;
+      this.failures = 0;
       this.apply(result);
     } catch (err) {
       if (!this.live()) return;
-      this.fail(err);
+      this.handleError(err, () => void this.post());
     }
   }
 
@@ -127,10 +162,11 @@ export class LaunchController {
     try {
       const result = await this.deps.api.getStatus(this.project.id);
       if (!this.live()) return;
+      this.failures = 0;
       this.apply(result);
     } catch (err) {
       if (!this.live()) return;
-      this.fail(err);
+      this.handleError(err, () => void this.poll());
     }
   }
 
@@ -146,12 +182,38 @@ export class LaunchController {
       this.giveUp();
       return;
     }
+    if (state === 'stopping') this.sawStopping = true;
+    if (state === 'stopped' && this.sawStopping && !this.reposted) {
+      this.reposted = true;
+      this.emit();
+      this.schedule(() => void this.post(), 0);
+      return;
+    }
     this.emit();
-    this.schedule(() => this.poll(), POLL_MS);
+    this.schedule(() => void this.poll(), POLL_MS);
   }
 
-  private fail(_err: unknown): void {
-    this.giveUp();
+  private handleError(err: unknown, retry: () => void): void {
+    const kind = err instanceof ApiError ? err.kind : 'network';
+    if (kind === 'not-found') {
+      this.project = { ...this.project, state: 'unavailable' };
+      this.finish();
+      return;
+    }
+    if (this.timedOut()) {
+      this.giveUp();
+      return;
+    }
+    if (kind === 'rate-limited') {
+      this.schedule(retry, RATE_LIMIT_MS);
+      return;
+    }
+    this.failures += 1;
+    if (this.failures > MAX_RETRIES) {
+      this.giveUp();
+      return;
+    }
+    this.schedule(retry, RETRY_MS);
   }
 
   private timedOut(): boolean {
@@ -160,6 +222,7 @@ export class LaunchController {
 
   private finish(): void {
     this.running = false;
+    this.pending = null;
     this.clearTimer();
     this.emit();
   }
@@ -171,8 +234,14 @@ export class LaunchController {
 
   private schedule(action: () => void, ms: number): void {
     this.clearTimer();
+    if (this.hidden) {
+      this.pending = action;
+      return;
+    }
+    this.scheduled = action;
     this.timer = this.deps.setTimer(() => {
       this.timer = null;
+      this.scheduled = null;
       action();
     }, ms);
   }
@@ -182,6 +251,7 @@ export class LaunchController {
       this.deps.clearTimer(this.timer);
       this.timer = null;
     }
+    this.scheduled = null;
   }
 
   private live(): boolean {

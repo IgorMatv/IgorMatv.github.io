@@ -163,3 +163,172 @@ test('dispose clears pending timers', async () => {
   await clock.advance(20_000);
   assert.equal(api.count('status'), 0);
 });
+
+// ---- errors, stopping, visibility ----
+
+const statusTimes = (api: ReturnType<typeof setup>['api']) =>
+  api.calls.filter((c) => c.method === 'status').map((c) => c.at - T0);
+
+test('429 skips the tick; next status after 8000 ms', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'starting' }), 'rate-limited', project({ state: 'starting' })];
+  controller.start();
+  await clock.advance(20_000);
+  assert.deepEqual(statusTimes(api), [4000, 8000, 16_000, 20_000]);
+  assert.equal(controller.view.phase, 'starting');
+});
+
+test('network/5xx: 3 retries at 4000 ms, 4th failure → failed', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = ['server', 'network', 'server', 'server'];
+  controller.start();
+  await clock.advance(40_000);
+  assert.deepEqual(statusTimes(api), [4000, 8000, 12_000, 16_000]);
+  assert.equal(controller.view.phase, 'failed');
+  assert.equal(controller.view.running, false);
+});
+
+test('a success resets the retry counter', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  const ok = project({ state: 'booting' });
+  api.statusReplies = ['server', 'server', 'server', ok, 'server', 'server', 'server', ok];
+  controller.start();
+  await clock.advance(36_000);
+  assert.equal(controller.view.phase, 'booting');
+  assert.equal(controller.view.running, true);
+});
+
+test('404 on status → unavailable', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = ['not-found'];
+  controller.start();
+  await clock.advance(20_000);
+  assert.equal(controller.view.phase, 'unavailable');
+  assert.equal(api.count('status'), 1);
+});
+
+test('start returns stopping → keep polling; first stopped → POST once more', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'stopping' }), project({ state: 'starting' })];
+  api.statusReplies = [
+    project({ state: 'stopping' }),
+    project({ state: 'stopped' }),
+    project({ state: 'starting' }),
+  ];
+  controller.start();
+  await clock.advance(4000);
+  assert.equal(controller.view.phase, 'stopping');
+  await clock.advance(4000);
+  assert.deepEqual(
+    api.calls.map((c) => [c.method, c.at - T0]),
+    [
+      ['start', 0],
+      ['status', 4000],
+      ['status', 8000],
+      ['start', 8000],
+    ],
+  );
+  await clock.advance(4000);
+  assert.equal(controller.view.phase, 'starting');
+});
+
+test('second stopped after the re-POST does not POST a third time', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'stopping' })];
+  api.statusReplies = [project({ state: 'stopped' })];
+  controller.start();
+  await clock.advance(30_000);
+  assert.equal(api.count('start'), 2);
+  assert.equal(controller.view.running, true);
+});
+
+test('setHidden(true) → no requests while hidden', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'starting' })];
+  controller.start();
+  await clock.advance(4000);
+  controller.setHidden(true);
+  const before = api.calls.length;
+  await clock.advance(60_000);
+  assert.equal(api.calls.length, before);
+  assert.equal(clock.pending, 0);
+});
+
+test('setHidden(false) → immediate status, then 4000 ms cadence', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'starting' })];
+  controller.start();
+  await clock.advance(5000);
+  controller.setHidden(true);
+  await clock.advance(30_000);
+  controller.setHidden(false);
+  await clock.advance(8000);
+  assert.deepEqual(statusTimes(api), [4000, 35_000, 39_000, 43_000]);
+});
+
+test('setHidden(false) without a launch makes no request', async () => {
+  const { controller, api, clock } = setup();
+  controller.setHidden(true);
+  controller.setHidden(false);
+  await clock.advance(10_000);
+  assert.equal(api.calls.length, 0);
+});
+
+test('hidden past the timeout → on show: one status; not ready → failed', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'booting' })];
+  controller.start();
+  await clock.advance(4000);
+  controller.setHidden(true);
+  await clock.advance(300_000);
+  controller.setHidden(false);
+  await clock.advance(20_000);
+  assert.equal(api.count('status'), 2);
+  assert.equal(controller.view.phase, 'failed');
+});
+
+test('hidden past the timeout → on show: ready still wins', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'booting' }), project({ state: 'ready' })];
+  controller.start();
+  await clock.advance(4000);
+  controller.setHidden(true);
+  await clock.advance(300_000);
+  controller.setHidden(false);
+  await clock.advance(1000);
+  assert.equal(controller.view.phase, 'ready');
+});
+
+test('POST fails with network error → counts as a retry, not a crash', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = ['network', project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'starting' })];
+  controller.start();
+  await clock.advance(8000);
+  assert.deepEqual(
+    api.calls.map((c) => [c.method, c.at - T0]),
+    [
+      ['start', 0],
+      ['start', 4000],
+      ['status', 8000],
+    ],
+  );
+  assert.equal(controller.view.phase, 'starting');
+});
+
+test('while running, a stopped status is shown as starting', async () => {
+  const { controller, api, clock } = setup();
+  api.startReplies = [project({ state: 'starting' })];
+  api.statusReplies = [project({ state: 'stopped' })];
+  controller.start();
+  await clock.advance(4000);
+  assert.equal(controller.view.phase, 'starting');
+});
