@@ -90,8 +90,8 @@ export class FakeApi implements LauncherApi {
   }
 
   private async resolve<T>(reply: T | ApiErrorKind): Promise<T> {
-    if (typeof reply === 'string') throw new ApiError(reply);
-    return reply;
+    if (typeof reply === 'string') throw new ApiError(reply as ApiErrorKind);
+    return reply as T;
   }
 
   listProjects() {
