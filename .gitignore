@@ -3,3 +3,6 @@
 # Design reference files (source-of-truth for copy during initial build) —
 # kept locally, not published in the public site repo.
 portfolio-design/
+
+# Brainstorming mockups (local only)
+.superpowers/
