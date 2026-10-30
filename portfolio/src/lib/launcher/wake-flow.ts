@@ -55,22 +55,13 @@ export function runWakeFlow(wake: Wake, page: DemosPage): void {
   const name = controller.view.name;
   const target = buildTarget(controller.view.appUrl, wake.next);
 
-  // Arriving here while the app already runs means the browser still reached the
-  // sleep redirect (a reused connection or cached DNS). Redirecting again would
-  // loop, so offer a link and explain instead.
+  // Already running (the browser hit the sleep redirect on the old host just
+  // before DNS flipped back): nothing to start, go straight to the game.
+  // appUrl never points at the sleep redirect, so this cannot loop.
   if (controller.view.phase === 'ready') {
-    modal.set({
-      kicker: 'Ready',
-      title: `${name} is running`,
-      text:
-        'If your browser keeps bringing you back here, it is still holding on to an old connection. ' +
-        'Wait a minute and try again, or open the link in a private window.',
-      actions: [
-        { label: `Open ${name}`, variant: 'primary', href: target },
-        { label: 'Stay on this page', variant: 'outline', onClick: () => modal.close() },
-      ],
-    });
+    modal.set({ kicker: 'Ready', title: `${name} is running`, text: 'Taking you there…', actions: [] });
     modal.open();
+    location.replace(target);
     return;
   }
 

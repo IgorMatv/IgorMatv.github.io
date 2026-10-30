@@ -165,16 +165,10 @@ test('wake with next: Start → lands back on the room', async () => {
   await context.close();
 });
 
-test('wake while already running: no auto-redirect, manual link with a hint', async () => {
+test('wake while already running: straight to the game, nothing started', async () => {
   const fake = new FakeLauncher('ready');
   const { page, context } = await open(fake, '/?wake=beatgame&next=%2F%3Froom%3DXXXXXX&mock=real');
-  await modal(page).getByText('Beat Game is running').waitFor();
-  assert.equal(
-    await modal(page).getByRole('link', { name: 'Open Beat Game' }).getAttribute('href'),
-    `${APP}/?room=XXXXXX`,
-  );
-  await sleep(5000);
-  assert.ok(page.url().startsWith(BASE), 'stayed on the portfolio');
+  await page.waitForURL(`${APP}/?room=XXXXXX`, { timeout: 15_000 });
   assert.equal(fake.count('/start'), 0);
   await context.close();
 });
@@ -183,11 +177,7 @@ for (const evil of ['%2F%2Fevil.com', 'https%3A%2F%2Fevil.com']) {
   test(`wake with next=${decodeURIComponent(evil)} goes to appUrl + /`, async () => {
     const fake = new FakeLauncher('ready');
     const { page, context } = await open(fake, `/?wake=beatgame&next=${evil}&mock=real`);
-    await modal(page).getByText('Beat Game is running').waitFor();
-    assert.equal(
-      await modal(page).getByRole('link', { name: 'Open Beat Game' }).getAttribute('href'),
-      `${APP}/`,
-    );
+    await page.waitForURL(`${APP}/`, { timeout: 15_000 });
     await context.close();
   });
 }
