@@ -332,3 +332,13 @@ test('while running, a stopped status is shown as starting', async () => {
   await clock.advance(4000);
   assert.equal(controller.view.phase, 'starting');
 });
+
+test('API responses keep the display name from the initial project', async () => {
+  const { controller, api, clock } = setup(project({ name: 'Beat Game' }));
+  api.startReplies = [project({ state: 'starting', name: 'BeatGame' })];
+  api.statusReplies = [project({ state: 'ready', name: 'BeatGame' })];
+  controller.start();
+  await clock.advance(4000);
+  assert.equal(controller.view.phase, 'ready');
+  assert.equal(controller.view.name, 'Beat Game');
+});

@@ -172,7 +172,12 @@ export class LaunchController {
 
   private apply(result: Project): void {
     // POST /start usually returns startedAt: null; keep the last known value.
-    this.project = { ...result, startedAt: result.startedAt ?? this.project.startedAt };
+    // The display name is fixed by the caller (the site's own spelling).
+    this.project = {
+      ...result,
+      name: this.project.name,
+      startedAt: result.startedAt ?? this.project.startedAt,
+    };
     const state: ProjectState = result.state;
     if (state === 'ready' || state === 'unavailable') {
       this.finish();
