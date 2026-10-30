@@ -20,7 +20,7 @@ export interface TechGroup {
 export const beatGame = {
   slug: 'beat-game',
   name: 'Beat Game',
-  statusLabel: 'Independent Product · Live',
+  statusLabel: 'Independent Product · Live Demo',
   liveUrl: 'https://beatgame.app',
   githubUrl: 'https://github.com/IgorMatv/beat-game-public',
   lede: 'A real-time multiplayer music-guessing game where players create rooms, join sessions, listen to music clips, submit answers, and compete across synchronised rounds.',

@@ -16,6 +16,8 @@ interface Props {
   lede: string;
   techTags: string[];
   liveUrl?: string;
+  /** On-site launcher page; takes precedence over liveUrl. */
+  demoHref?: string;
   githubUrl?: string;
   backHref?: string;
 }
@@ -28,6 +30,7 @@ const {
   lede,
   techTags,
   liveUrl,
+  demoHref,
   githubUrl,
   backHref = '/#work',
 } = Astro.props;
@@ -44,7 +47,14 @@ const {
       <TechnologyTags tags={techTags} variant="outline" label={`${name} technologies`} />
       <div class="page-head__actions">
         {
-          liveUrl && (
+          demoHref && (
+            <a class="btn btn--sm btn--deep" href={demoHref}>
+              Try Live Demo
+            </a>
+          )
+        }
+        {
+          !demoHref && liveUrl && (
             <a class="btn btn--sm btn--deep" href={liveUrl} target="_blank" rel="noopener noreferrer">
               Live Product<span class="visually-hidden"> (opens in new tab)</span>
             </a>
