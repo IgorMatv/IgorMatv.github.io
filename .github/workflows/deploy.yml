@@ -40,6 +40,10 @@ jobs:
         working-directory: portfolio
         run: npm run check
 
+      - name: Test
+        working-directory: portfolio
+        run: npm test
+
       - name: Build
         working-directory: portfolio
         run: npm run build
