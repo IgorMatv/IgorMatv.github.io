@@ -495,6 +495,9 @@ a:hover {
   font-size: var(--text-md);
   border: 1px solid transparent;
   line-height: 1.2;
+  /* .btn is also used on <button>: drop the browser's own font and grey background. */
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .btn--primary {
@@ -508,6 +511,7 @@ a:hover {
 }
 
 .btn--outline {
+  background: transparent;
   border-color: var(--color-border-strong);
   color: var(--color-text);
 }

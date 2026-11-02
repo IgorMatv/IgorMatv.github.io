@@ -280,3 +280,19 @@ test('API down: wake fallback link uses the canonical https://beatgame.app', asy
   );
   await context.close();
 });
+
+test('dark theme: outline buttons in the wake modal are readable (no UA background)', async () => {
+  const context = await browser.newContext({ viewport: { width: 1000, height: 760 }, colorScheme: 'dark' });
+  await context.route('https://static.cloudflareinsights.com/**', (r) => r.abort());
+  const page = await context.newPage();
+  await page.goto(`${BASE}/?wake=beatgame&mock=stopped`);
+  const stay = modal(page).getByRole('button', { name: 'Stay on this page' });
+  await stay.waitFor();
+  const style = await stay.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { bg: cs.backgroundColor, font: cs.fontFamily };
+  });
+  assert.equal(style.bg, 'rgba(0, 0, 0, 0)');
+  assert.match(style.font, /Work Sans/);
+  await context.close();
+});
