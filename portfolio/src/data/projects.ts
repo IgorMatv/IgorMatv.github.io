@@ -76,7 +76,6 @@ export const beatGame = {
   currentStatus:
     'Beat Game is live at beatgame.app and remains under active development. The current version supports multiplayer and solo gameplay, real-time session updates, scoring, reconnect and rejoin flows, persistent data, external music previews, monitoring, and automated backend testing.',
   homepage: {
-    kicker: 'Featured Independent Product',
     description:
       'A live multiplayer music-guessing game where players create rooms, join sessions, and compete across synchronised rounds.',
     contribution:
